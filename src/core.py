@@ -4,6 +4,7 @@ import inspect
 
 
 class Cons:
+    __match_args__ = ("head", "rest")
     def __init__(self, value, other):
         self.value = value
         self.other = other
@@ -37,14 +38,15 @@ def tail(lst):
 
 
 ## need to use match_args for pattern, matching I can probably use this as real pattern mattern a la FP
-#def map(func, linked):
-#    if isinstance(linked, Linked):
-#        match linked: 
-#            case Cons(value, other): 
-#
-#        pass 
-#    pass 
-# pass 
+def map(func, linked):
+    if isinstance(linked, Linked):
+        match linked: 
+            case Cons(head, rest): 
+                return Cons(func(head), map(func, rest))
+            case Empty(): 
+                return Empty()
+    else:
+        raise TypeError("Not a Linked type")
 
 ### this is for code introspection stuff
 def is_lambda_function(func):
