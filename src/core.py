@@ -1,52 +1,59 @@
 import functools
 import inspect
 
-
-
 class Cons:
     __match_args__ = ("head", "rest")
+
     def __init__(self, value, other):
         self.value = value
         self.other = other
         if not isinstance(self.other, Linked):
-            raise TypeError("Not of Linked type")  
-class Empty: 
-    pass 
+            raise TypeError("Not of Linked type")
+        
+    def __iter__(self):
+        yield self.value
+        if isinstance(self.other, Linked):
+            if isinstance(self.other, Cons):
+                yield from self.other
+            else:
+                yield Empty()
+
+
+    def __repr__(self): 
+
+        values = [str(value) + ", " if not isinstance(value, Empty) else str(value)  for value in self] 
+        values.insert(0, "(")
+        values.append(")")
+        return functools.reduce(lambda x, y: x + y, values)
+
+
+class Empty:
+    def __repr__(self): 
+        return "()"
+    
 
 Linked = Cons | Empty
 
-
-def head(lst): 
+def head(lst):
     if isinstance(lst, Linked):
-        if isinstance(lst, Cons):
+        if isinstance(lst, Cons): 
             return lst.value
-        else: 
-            ## adding templating here
-            raise TypeError("lst is empty") 
-    else:
-        raise TypeError("Not of the linked type")
-    
-def tail(lst): 
+        if isinstance(lst, Empty): 
+            raise TypeError("Not of linked type")
+def tail(lst):
     if isinstance(lst, Linked):
-        if isinstance(lst, Cons):
+        if isinstance(lst, Cons): 
             return lst.other
-        else: 
-            ## adding templating here
-            raise TypeError("lst is empty") 
-    else:
-        raise TypeError("Not of the linked type")
-
-
-## need to use match_args for pattern, matching I can probably use this as real pattern mattern a la FP
+        if isinstance(lst, Empty): 
+            raise TypeError("Not of linked type")
 def map(func, linked):
-    if isinstance(linked, Linked):
-        match linked: 
-            case Cons(head, rest): 
-                return Cons(func(head), map(func, rest))
-            case Empty(): 
-                return Empty()
+    if isinstance(linked, Cons):
+        return Cons(func(linked.value), map(func, linked.other)) 
+    elif isinstance(linked, Empty):
+        return Empty()
     else:
         raise TypeError("Not a Linked type")
+## need to use match_args for pattern, matching I can probably use this as real pattern mattern a la FP
 
 ### this is for code introspection stuff
 def is_lambda_function(func):
@@ -65,8 +72,6 @@ def add(*args):
 
 def mul(*args): 
     return functools.reduce(lambda x, y: x * y, args)
-
-
 
 ## the crux of what is happening
 class S:
@@ -89,8 +94,15 @@ print(result)  # Output: 20
 
 #print(new_result) 
 
-lst_example = Cons(3, Empty())
+lst_example = Cons(1, Cons(2, Cons(3, Empty())))
 
-print(lst_example)
 print(head(lst_example))
-print(isinstance(lst_example))
+
+val = map(lambda x: x * 3, lst_example)
+
+print(head(val))
+
+print(tail(val))
+
+
+print(val)
